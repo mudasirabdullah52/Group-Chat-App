@@ -17,7 +17,7 @@ if (btnSubmit) {
                 await displayNotification('Login Successful', 'success', divAlert);
                 const token = result.data.token;
                 localStorage.setItem('token', token)
-                window.location.href = '/expense/mainDashboard';
+                window.location.href = '/chat/mainDashboard';
             }
         } catch (error) {
             console.log(error);
