@@ -43,8 +43,8 @@ exports.postRegistrationData = async (req, res) => {
     }
 };
 
-const generateAccessToken = (id, name, isPremium) => {
-    return jwt.sign({ userId: id, name: name, isPremium: isPremium }, 'secretkey');
+const generateAccessToken = (id, name,) => {
+    return jwt.sign({ userId: id, name: name }, 'secretkey');
 }
 
 exports.checkLogin = async (req, res) => {
@@ -65,7 +65,7 @@ exports.checkLogin = async (req, res) => {
         if (data) {
             const checkLogin = await bcrypt.compare(password, data.password);
             if (checkLogin) {
-                res.status(201).json({ message: 'success', token: generateAccessToken(data.id, data.name, data.isPremium) });
+                res.status(201).json({ message: 'success', token: generateAccessToken(data.id, data.name) });
                 // res.status(201).json({ message: 'success' });
             } else {
                 res.status(401).json({ message: 'Failed' });

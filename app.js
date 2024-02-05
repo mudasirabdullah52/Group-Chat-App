@@ -5,8 +5,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const router = require('./Routes/routes');
 const userRoute = require('./Routes/userRoutes');
-const chatRoute = require('./Routes/chatRoutes');
-
+const chatRoutes = require('./Routes/chatRoutes');
 const path = require('path');
 
 const app = express();
@@ -16,7 +15,8 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 
-
+// app.use(express.static('Views'));
+app.use(express.static(path.join(__dirname, 'Views')));
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -24,7 +24,7 @@ app.use(bodyParser.json());
 
 // Rotuers
 app.use("/user", userRoute);
-app.use("/chat", chatRoute);
+app.use("/chat", chatRoutes);
 app.use(router);
 
 
