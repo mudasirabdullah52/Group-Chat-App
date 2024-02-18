@@ -26,7 +26,7 @@
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light" id="navBeforeLogin">
         <div class="position-absolute top-0 end-0 me-5" id="div-alert"></div>
-        <a class="navbar-brand" href="#">Group Chat App</a>
+        <a class="navbar-brand" href="#">Chat App</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -40,7 +40,7 @@
                     <a class="nav-link" href="/chat/chatRoom" id="chatlink">Chat Room</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" id="chatlink">Friends</a>
+                    <a class="nav-link" href="#" id="profile">profile</a>
                 </li>
 
             </ul>
@@ -55,49 +55,160 @@
 
 <body>
 
-    <div class="container">
-        <div class="chat-container">
-            <div class="chat-header">
-                Chat App
-            </div>
-            <div class="chat-messages" id="chatbox">
-                <div class="message sender" id="sender">
-                    <div class="message-content" id="senderMsg">?</div>
-                </div>
-                <div class="message receiver" id=receiver>
-                    <div class="message-content" id="receiverMsg">.</div>
+    <div class="container-fluid">
+        <div class="row ">
+            <div class="col-md-3" id="leftPennel">
+                <div class="d-flex justify-content-between">
+                    <span class="bg-warning">Groups</span>
+                    <button id="createGroupModal" class="btn btn-success btn-sm float-right">+</button>
                 </div>
 
-                <div class="loading-button text-center mt-3" id="loading">
-                    <button class="btn btn-primary" disabled></button>
-                </div>
-                <!-- Add more messages as needed -->
-            </div>
-            <form id="massageForm">
-                <div class="chat-input">
-                    <input type="text" id="messageText" class="input-box" placeholder="Type your message...">
-                    <button type="submit" class="send-button">Send</button>
-                </div>
-            </form>
+                <div class="row">
 
+                    <ul class="list-group mt-3 ms-2 " id="groupsList">
+
+                    </ul>
+
+                </div>
+
+                <!-- lksdljsld -->
+            </div>
+
+            <div class="col-md-9 " id="chatBot">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="d-flex justify-content-between">
+                            <h4 id="groupHeader">chat Group</h4>
+                            <button id="editgroup" class="btn btn-warning"> edit</button>
+                        </div>
+                    </div>
+                    <div class="chat-messages" id="chatbox">
+                        <div class="message sender" id="sender">
+                            <div class="message-content" id="senderMsg">?</div>
+                        </div>
+                        <div class="message receiver" id=receiver>
+                            <div class="message-content" id="receiverMsg"></div>
+                        </div>
+
+                        <div class="loading-button text-center mt-3" id="loading">
+                            <button class="btn btn-primary" disabled></button>
+                        </div>
+                        Add more messages as needed
+                    </div>
+                    <form id="massageForm">
+                        <img id="imagePreview" class="img-fluid mt-2"
+                            style="display: none; height: 100px; width: 100px;">
+                        <p id="showFileName"></p>
+                        <div class="chat-input">
+
+                            <input type="file" class="form-control" id="fileInput" name="fileInput"
+                                style="display: none;">
+                            <label for="fileInput" class="input-group-text"><i class="fas fa-upload"></i></label>
+
+                            <input type="text" id="messageText" class="input-box" placeholder="Type your message...">
+                            <button type="submit" class="send-button">Send</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="modal" id="GroupModal" tabindex="-3" aria-hidden="true" data-mdb-backdrop="true"
+        data-mdb-keyboard="true">
+        <div class="modal-dialog" style="width: auto;">
+            <div class="modal-content text-center">
+                <div class="modal-header h5 text-white bg-primary justify-content-center " id="updateGroupName">
+                    Create Group
+                </div>
+                <div class="modal-body px-5">
+                    <div class="row" id="createGroup">
+                        <form action="" id="groupFrom">
+
+                            <div class="mb-3">
+                                <input type="number" id="groupId" hidden>
+                                <label for="groupName" class="form-label">Group Name</label>
+                                <input type="text" class="form-control" id="groupName"
+                                    placeholder="Enter Group Name ..." required></input>
+                            </div>
+                            <div id="userList">
+                                <div class="list-group mb-3">
+                                    <label class="list-group-item" id="checkLable">
+                                        <input class="form-check-input me-1" id="checkbox" type="checkbox"
+                                            value="Mudasir" />
+                                        First checkbox
+                                    </label>
+                                </div>
+
+                            </div>
+
+                            <button type="submit" class="send-button">create</button>
+                        </form>
+
+                    </div>
+
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- <script>
+
+
+    <div class="modal" id="updateModel" tabindex="-3" aria-hidden="true" data-mdb-backdrop="true"
+        data-mdb-keyboard="true">
+        <div class="modal-dialog" style="width: auto;">
+            <div class="modal-content text-center">
+                <div class="modal-header h5 text-white bg-primary justify-content-center">
+                    Update Group
+                </div>
+                <div class="modal-body px-5">
+                    <ul class="list-group mt-3 ms-2 " id="updateGroupList"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="profileModel" tabindex="-3" aria-hidden="true" data-mdb-backdrop="true"
+        data-mdb-keyboard="true">
+        <div class="modal-dialog" style="width: auto;">
+            <div class="modal-content text-center">
+                <div class="modal-header h5 text-white bg-primary justify-content-center">
+                    User Proflie
+                </div>
+                <div class="modal-body px-5">
+                    <img style="height: 50px; width: 50px; border-radius: 50%;"
+                        src="https://images.pexels.com/photos/906052/pexels-photo-906052.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                        alt="">
+                    <table id="profileDetails">
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
         // Show the loading button during page load
         function myFunction() {
-            const loadingButton = document.querySelector('.loading-button');
-            loadingButton.style.display = 'none';
-            console.log("hi")
+
+            var chatbox = document.getElementById("chatbox");
+            chatbox.scrollTop = chatbox.scrollHeight;
+            // console.log("hi")
 
         }
-        setInterval(myFunction, 500);
+        setInterval(myFunction, 1000);
 
-    </script> -->
+    </script>
 
 
-    <script src="../js/script.js"></script>
-    <script src="../js/chatRoom.js"></script>
+
+
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+
+    <!-- <script src="/socket.io/socket.io.js"> </script> -->
+    <script src="/js/script.js"></script>
+    <script src="/js/chatRoom.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
         crossorigin="anonymous"></script>
@@ -107,6 +218,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"></script>
+
 </body>
 </script>
 

@@ -1,4 +1,6 @@
 const User = require('../Models/userModel');
+const GroupModel = require('../Models/groupsModel');
+const userGroupsModel = require('../Models/userGroupsModel');
 const forgetPasswordModel = require('../Models/forgetPasswordModel');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
@@ -22,21 +24,23 @@ exports.postRegistrationData = async (req, res) => {
     const { nameInput, phoneInput, emailInput, passwordInput } = req.body
 
     console.log(nameInput, phoneInput, emailInput, passwordInput, '"controlelr"');
-    // const date = formatDate(moment().format('L'));
-
     try {
         const passWord = await bcrypt.hash(passwordInput, 10);
-        await User.create({
+        const user = await User.create({
             name: nameInput,
             phoneNo: phoneInput,
             email: emailInput,
             password: passWord
         });
+        const group = await GroupModel.findByPk(1);
+        group.addUsers(user.id);
         res.status(201).json({ message: 'success' });
     } catch (err) {
+
         if (err.name === 'SequelizeUniqueConstraintError') {
             res.status(409).json({ message: 'exist' });
-        } else {
+        }
+        else {
             console.error(err);
             res.status(500).json({ message: 'Internal Server Error' });
         }
@@ -80,7 +84,6 @@ exports.checkLogin = async (req, res) => {
 };
 
 exports.SendforgetPasswordLink = async (req, res) => {
-    // const apiKey = 'xsmtpsib-10ea09bf079968a53d6ba28224f5e970f1704358b75a66d3dbe7a971e3b129ee-gaqsyNSCW9PfD45U';
     try {
         const email = req.body.emailId;
         console.log(email);
@@ -172,3 +175,106 @@ exports.updatePasswordData = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
+exports.getUserProfile = async (req, res) => {
+
+    try {
+
+        let result = await User.findOne({ where: { id: req.user.id } })
+        res.status(200).json(result)
+
+    } catch (err) {
+        console.log(err)
+        res.status(500).json(err)
+    }
+}
+exports.getUserList = async (req, res) => {
+
+    try {
+
+        let result = await User.findAll()
+        res.status(200).json(result)
+
+    } catch (err) {
+        console.log(err)
+        res.status(500).json(err)
+    }
+}
+exports.createGroup = async (req, res) => {
+    let AdminId = req.user.id;
+    const { name, nomember, userList } = req.body
+    try {
+        let group = await GroupModel.create({
+            name: name,
+            nomember: nomember,
+            AdminId: AdminId
+        })
+        // Associate the users with the group
+        const users = await User.findAll({ where: { id: userList } });
+
+        await group.addUsers(users);
+
+        res.status(201).json({ message: 'success' });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err)
+    }
+}
+
+exports.getGroupList = async (req, res) => {
+
+    try {
+        const user = await User.findByPk(req.user.id, {
+            include: [{ model: GroupModel, through: userGroupsModel }],
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        const groups = user.groups; // Access the associated groups
+        return res.status(200).json(groups);
+        // console.log(user);
+    }
+    catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Server error" });
+    }
+}
+exports.getUserOfGroup = async (req, res) => {
+
+    const id = req.params.groupId;
+
+    try {
+
+        const group = await GroupModel.findOne({ where: { id: id } });
+        const members = await group.getUsers();
+        return res.status(200).json(members);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+
+exports.updateUserGroup = async (req, res) => {
+    let UserId = req.user.id;
+    let groupId = req.params.id;
+    const { name, nomember, userList } = req.body
+    const group = await GroupModel.findOne({ where: { id: groupId } });
+
+    // console.log(name, nomember, userList, "groid:", groupId, "userId:", )
+    try {
+        const updatedGroup = await group.update({
+            name: name,
+            nomember: nomember,
+            AdminId: UserId
+        })
+        await updatedGroup.setUsers(null);
+        await updatedGroup.addUsers(userList);
+
+        return res.status(200).json({ message: "success" })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Server error" });
+    }
+}
