@@ -23,15 +23,15 @@ const Group = sequelize.define("group", {
 });
 
 
-// Group.afterSync(options => {
-//     if (!options.force) {
-//         return Group.create({
-//             name: 'Common Group',
-//             // description: 'Default Description',
-//             nomember: 100
-//         });
-//     }
-// });
+Group.afterSync(options => {
+    if (options.force) {
+        return Group.create({
+            name: 'Common Group',
+            // description: 'Default Description',
+            nomember: 100
+        });
+    }
+});
 
 
 module.exports = Group;

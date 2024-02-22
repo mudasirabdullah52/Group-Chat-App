@@ -8,9 +8,12 @@ const GroupchatModel = sequelize.define('GroupchatModel', {
         primaryKey: true,
         autoIncrement: true
     },
-    senderId: {
-        type: Sequelize.INTEGER,
-        allowNull: false
+    ImageUrl: {
+        type: Sequelize.TEXT,
+
+    },
+    isImage: {
+        type: Sequelize.BOOLEAN
     },
     messageText: {
         type: Sequelize.TEXT,

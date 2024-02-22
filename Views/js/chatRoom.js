@@ -197,7 +197,7 @@ createGroup.addEventListener('submit', async (e) => {
 // Save message into db 
 document.getElementById('fileInput').addEventListener('change', function () {
     var fileName = this.files[0].name;
-    document.getElementById('showFileName').innerHTML = 'Selected file: ' + fileName;
+    document.getElementById('showFileName').innerHTML = fileName;
     var preview = document.getElementById('imagePreview');
     preview.style.display = 'block';
 
@@ -212,21 +212,38 @@ massageFrom.addEventListener('submit', async (e) => {
     e.preventDefault();
     const stringObj = localStorage.getItem('groupinfo')
     const groupinfo = JSON.parse(stringObj);
-    console.log("current group id", groupinfo)
+    // console.log("current group id", groupinfo)
     const groupId = groupinfo.currentGroupId;
     const groupName = groupinfo.currentGroupName;
-    // const fileInput = document.getElementById('fileInput')
-    // console.log(fileInput.files[0].name)
+    const fileInput = document.getElementById('fileInput')
+    const file = fileInput.files[0]
     let messageText = document.getElementById('messageText').value
     try {
         const token = localStorage.getItem('token');
-        const response = await axios.post('/chat/sendMessage', { messageText, groupId }, { headers: { "Authorization": token } });
-        if (response.data.message == 'success') {
-            await displayNotification('message send Successfully!', 'success', divAlert);
-            massageFrom.reset();
-            socket.emit('new-group-message', groupinfo)
-            readChatBoxMessage(groupId, groupName);
+        if (!file) {
+            const response = await axios.post('/chat/sendMessage', { messageText, groupId }, { headers: { "Authorization": token } });
+            if (response.data.message == 'success') {
+                await displayNotification('message send Successfully!', 'success', divAlert);
+                massageFrom.reset();
+                document.getElementById('imagePreview').src = "";
+                socket.emit('new-group-message', groupinfo)
+                readChatBoxMessage(groupId, groupName);
+            }
         }
+        else {
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('groupId', groupId)
+            const response = await axios.post('/chat/sendImage', formData, { headers: { "Authorization": token } });
+            if (response.data.message == 'success') {
+                await displayNotification('message send Successfully!', 'success', divAlert);
+                massageFrom.reset();
+                socket.emit('new-group-message', groupinfo)
+                readChatBoxMessage(groupId, groupName);
+            }
+        }
+
     } catch (error) {
         console.log(error);
         await displayNotification("Internal Server Error!", 'danger', divAlert);
@@ -279,51 +296,100 @@ const showChatBoxMessages = async (groupId, groupName) => {
     chatBox.innerHTML = ""
     const storedMessages = JSON.parse(localStorage.getItem('lastTenMessages'));
     storedMessages.forEach((message) => {
+
         let messageText = message.messageText;
         let currentTime = message.currentTime;
         const token = localStorage.getItem('token');
         const decodeToken = parseJwt(token)
-        // console.log(decodeToken.userId, message.senderId);
-        if (decodeToken.userId == message.senderId) {
-
-            sup = document.createElement('sup');
-            sup.textContent = 'you'
-            sup.style.color = 'yellow'
-            let div1 = document.createElement('div');
-            div1.className = 'message sender';
-            div1.id = 'sender'
-
-            let div2 = document.createElement('div');
-            div2.className = 'message-content';
-            div2.id = 'senderMsg'
-            div2.appendChild(sup)
-            div2.appendChild(document.createTextNode(' ' + messageText + ' '))
-
-            let sub = document.createElement('sub')
-            sub.textContent = `${currentTime}`
-
-            div2.appendChild(sub);
-            div1.appendChild(div2)
-
-
-            // loading.parentNode.insertBefore(div1, loading);
-            chatBox.appendChild(div1)
-
-        } else {
-            let div1 = document.createElement('div');
-            div1.className = 'message receiver';
-            div1.id = 'receiver'
-            let div2 = document.createElement('div');
-            div2.className = 'message-content';
-            div2.id = 'receiverMsg'
-            div2.textContent = `${messageText} ${' '}`
-            let sub = document.createElement('sub')
-            sub.textContent = `${currentTime}`
-
-            div2.appendChild(sub);
-            div1.appendChild(div2)
-            chatBox.appendChild(div1)
+        console.log(message)
+        if (decodeToken.userId == message.UserId && message.isImage === true) {
+            chatBox.innerHTML += `<div class="message sender" id="sender">
+                            <div class="message-content" id="senderMsg">
+                            <sup>you</sup>
+                            <img style ="width: 100px; height: 100px; display: block:" src="../${message.ImageUrl}">
+                            ${messageText}
+                            <sub>${currentTime}</sub>
+                            </div>
+                        </div>`
         }
+        else if (decodeToken.userId == message.UserId) {
+            chatBox.innerHTML += `<div class="message sender" id="sender">
+                            <div class="message-content" id="senderMsg">
+                            <sup>you</sup>
+                            ${messageText}
+                            <sub>${currentTime}</sub>
+                            </div>
+                        </div>`
+        }
+        else if (message.isImage === true) {
+            chatBox.innerHTML += `<div class="message receiver" id="receiver">
+                            <div class="message-content" id="receiverMsg">
+                            <sup>${message.User.name}</sup>
+                             <img style ="width: 100px; height: 100px;" src="../${message.ImageUrl}">
+                            ${messageText}
+                            <sub>${currentTime}</sub>
+                            </div>
+                        </div>`
+        }
+        else {
+            chatBox.innerHTML += `<div class="message receiver" id="receiver">
+                            <div class="message-content" id="receiverMsg">
+                            <sup>${message.User.name}</sup>
+                            ${messageText}
+                            <sub>${currentTime}</sub>
+                            </div>
+                        </div>`
+        }
+
+
+        // if (decodeToken.userId == message.UserId) {
+
+        //     sup = document.createElement('sup');
+        //     sup.textContent = 'you'
+        //     sup.style.color = 'yellow'
+        //     let div1 = document.createElement('div');
+        //     div1.className = 'message sender';
+        //     div1.id = 'sender'
+
+        //     let div2 = document.createElement('div');
+        //     div2.className = 'message-content';
+        //     div2.id = 'senderMsg'
+        //     div2.appendChild(sup)
+        //     div2.appendChild(document.createTextNode(' ' + messageText + ' '))
+
+        //     let sub = document.createElement('sub')
+        //     sub.textContent = `${currentTime}`
+
+        //     div2.appendChild(sub);
+        //     div1.appendChild(div2)
+
+
+        //     // loading.parentNode.insertBefore(div1, loading);
+        //     chatBox.appendChild(div1)
+
+        // } else {
+        //     sup = document.createElement('sup');
+        //     sup.textContent = message.User.name;
+        //     sup.style.color = 'blue'
+        //     console.log('sender')
+
+        //     let div1 = document.createElement('div');
+        //     div1.className = 'message receiver';
+        //     div1.id = 'receiver'
+
+        //     let div2 = document.createElement('div');
+        //     div2.className = 'message-content';
+        //     div2.id = 'receiverMsg'
+
+        //     div2.appendChild(sup)
+        //     div2.appendChild(document.createTextNode(' ' + messageText + ' '))
+        //     let sub = document.createElement('sub')
+        //     sub.textContent = `${currentTime}`
+
+        //     div2.appendChild(sub);
+        //     div1.appendChild(div2)
+        //     chatBox.appendChild(div1)
+        // }
     })
 }
 

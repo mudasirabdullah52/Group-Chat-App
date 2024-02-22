@@ -24,10 +24,9 @@ exports.sendChat = async (req, res) => {
     console.log(formattedTime)
 
     try {
-
         await GroupchatModel.create({
             messageText: messageText,
-            senderId: req.user.id,
+            UserId: req.user.id,
             currentTime: formattedTime,
             groupId: groupId
         });
@@ -42,12 +41,12 @@ exports.getAllMessages = async (req, res) => {
     try {
 
         let result = await GroupchatModel.findAll({
-            // include: [
-            //     {
-            //         model: User,
-            //         attibutes: ['senderId', 'name']
-            //     }
-            // ],
+            include: [
+                {
+                    model: User,
+                    attibutes: ['UserId', 'name']
+                }
+            ],
             where: { groupId: groupId },
             order: [['createdAt', 'DESC']],
             limit: 10
@@ -60,4 +59,38 @@ exports.getAllMessages = async (req, res) => {
         console.log(err)
         res.status(500).json(err)
     }
+}
+
+exports.sendImage = async (req, res) => {
+
+    var currentTime = new Date
+    var hours = currentTime.getHours();
+    var minutes = currentTime.getMinutes();
+    var meridiem = (hours >= 12) ? 'PM' : 'AM';
+    hours = (hours > 12) ? hours - 12 : hours;
+    hours = (hours === 0) ? 12 : hours;
+    var formattedTime = hours + ':' + minutes + ' ' + meridiem;
+    console.log(formattedTime)
+    let { messageText, groupId } = req.body
+    const image = req.file;
+    console.log(image.path);
+    if (messageText == null) {
+        messageText = 'New Image'
+    }
+
+    try {
+        await GroupchatModel.create({
+            messageText: messageText,
+            UserId: req.user.id,
+            currentTime: formattedTime,
+            ImageUrl: image.path,
+            isImage: true,
+            groupId: groupId
+        });
+        res.status(201).json({ message: 'success' });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+
 }
