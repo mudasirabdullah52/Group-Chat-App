@@ -7,11 +7,11 @@ const Sequelize = require("sequelize");
 // });
 const sequelize = new Sequelize({
     dialect: 'mysql',
-    host: 'groupchatapp-myprojectt.a.aivencloud.com',
+    host: process.env.HOST,
     port: 10617,
-    username: 'avnadmin',
-    password: 'AVNS_MzT6WhP1gRr5eFmTSjj',
-    database: 'defaultdb',
+    username: process.env.USERNAME,
+    password: process.env.PASSWORD,
+    database: process.env.DATABASE,
     pool: {
         max: 5, // Adjust according to your needs
         min: 0,
@@ -19,7 +19,5 @@ const sequelize = new Sequelize({
         idle: 10000,
     }
 });
-
-
 
 module.exports = sequelize;
